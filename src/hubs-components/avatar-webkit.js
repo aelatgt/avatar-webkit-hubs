@@ -43,7 +43,14 @@ AFRAME.registerSystem("avatar-webkit", {
       fps: 30,
     })
 
+    let started = false
+    this.el.sceneEl.emit("facetracking_initializing")
+
     this.predictor.onPredict = (results) => {
+      if (!started) {
+        started = true
+        this.el.sceneEl.emit("facetracking_initialized")
+      }
       const { actionUnits, rotation } = results
       if (rpmController.supported) {
         // Convert head rotation from pitch / yaw / roll to quaternion

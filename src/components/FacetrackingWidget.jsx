@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef, useReducer, useState } from "preact/hooks"
+import { useLayoutEffect, useRef, useReducer, useState, useEffect } from "preact/hooks"
 import { Button } from "./Button"
 import { Collapsible } from "./Collapsible"
+import { Initializing } from "./Initializing"
 import { SettingsPopup } from "./SettingsPopup"
 
 export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction }) {
@@ -13,6 +14,22 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
   }
   const [openPreview, togglePreview] = useReducer(previewReducer, false)
   const [openSettings, setOpenSettings] = useState(false)
+
+  const [initializing, setInitializing] = useState(false)
+
+  /**
+   * Event listeners
+   */
+  useEffect(() => {
+    const onInitializing = () => setInitializing(true)
+    const onInitialized = () => setInitializing(false)
+    APP.scene.addEventListener("facetracking_initializing", onInitializing)
+    APP.scene.addEventListener("facetracking_initialized", onInitialized)
+    return () => {
+      APP.scene.removeEventListener("facetracking_initializing", onInitializing)
+      APP.scene.removeEventListener("facetracking_initialized", onInitialized)
+    }
+  }, [])
 
   useLayoutEffect(() => {
     canvasContainer.current.appendChild(canvasEl)
@@ -36,6 +53,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
         </Collapsible>
       </div>
       {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} />}
+      {initializing && <Initializing />}
     </>
   )
 }
