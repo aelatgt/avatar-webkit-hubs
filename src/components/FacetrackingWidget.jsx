@@ -17,6 +17,13 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
 
   const [initializing, setInitializing] = useState(false)
 
+  const [paused, setPaused] = useState(false)
+  const onClickPause = () => {
+    const _pause = !paused
+    APP.scene.emit("facetracking_action", _pause ? "pause" : "resume")
+    setPaused(_pause)
+  }
+
   /**
    * Event listeners
    */
@@ -43,8 +50,9 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
         <Collapsible open={openPreview}>
           <div ref={canvasContainer} class="mb-4" />
           <div class="flex justify-center gap-2 mb-4">
-            <Button>
-              <box-icon name="pause"></box-icon>Pause
+            <Button onClick={onClickPause}>
+              <box-icon name={paused ? "play" : "pause"}></box-icon>
+              {paused ? "Resume" : "Pause"}
             </Button>
             <Button onClick={() => setOpenSettings(!openSettings)}>
               <box-icon name="slider-alt"></box-icon>

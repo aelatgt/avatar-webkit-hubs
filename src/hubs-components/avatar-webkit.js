@@ -31,6 +31,12 @@ AFRAME.registerSystem("avatar-webkit", {
         case "calibrate_center":
           this.headCalibration.copy(this.rawHeadOrientation).invert()
           break
+        case "pause":
+          this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: false })
+          break
+        case "resume":
+          this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
+          break
       }
     })
   },

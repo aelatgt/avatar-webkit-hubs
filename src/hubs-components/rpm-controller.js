@@ -74,7 +74,7 @@ AFRAME.registerComponent("rpm-controller", {
       } else {
         this.restartDefaultBehaviors()
       }
-    } else if (this.supported) {
+    } else if (this.supported && this.data.trackingIsActive) {
       // Facial morphs
       this.applyFacialMorphs(this.data)
 
