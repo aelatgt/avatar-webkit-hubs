@@ -19,11 +19,14 @@ AFRAME.registerSystem("avatar-webkit", {
         startMediaStream((stream) => {
           this.startPredictor(stream)
         })
+        this.el.sceneEl.addEventListener(
+          "action_end_video_sharing",
+          () => {
+            this.stopPredictor()
+          },
+          { once: true }
+        )
       }
-    })
-
-    this.el.sceneEl.addEventListener("action_end_video_sharing", () => {
-      this.stopPredictor()
     })
 
     this.el.sceneEl.addEventListener("facetracking_action", (e) => {
@@ -80,5 +83,6 @@ AFRAME.registerSystem("avatar-webkit", {
   stopPredictor: function () {
     this.predictor.stop()
     this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: false })
+    this.el.sceneEl.emit("facetracking_stopped")
   },
 })

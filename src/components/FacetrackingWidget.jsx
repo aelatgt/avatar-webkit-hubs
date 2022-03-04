@@ -4,46 +4,74 @@ import { Collapsible } from "./Collapsible"
 import { Initializing } from "./Initializing"
 import { SettingsPopup } from "./SettingsPopup"
 
+/** @enum */
+const Status = {
+  STOPPED: 0,
+  INITIALIZING: 1,
+  RUNNING: 2,
+  PAUSED: 3,
+}
+
 export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction }) {
   const canvasContainer = useRef()
 
-  const previewReducer = (prevOpenPreview) => {
-    const openPreview = !prevOpenPreview
-    onPreviewVisibilityChange({ open: openPreview })
-    return openPreview
-  }
-  const [openPreview, togglePreview] = useReducer(previewReducer, false)
   const [openSettings, setOpenSettings] = useState(false)
+  const [openPreview, setOpenPreview] = useState(false)
+  const togglePreview = () => {
+    const _openPreview = !openPreview
+    onPreviewVisibilityChange({ open: _openPreview })
+    setOpenPreview(_openPreview)
+  }
 
-  const [initializing, setInitializing] = useState(false)
-
-  const [paused, setPaused] = useState(false)
+  const [status, setStatus] = useState(Status.STOPPED)
   const onClickPause = () => {
-    const _pause = !paused
-    APP.scene.emit("facetracking_action", _pause ? "pause" : "resume")
-    setPaused(_pause)
+    switch (status) {
+      case Status.PAUSED:
+        APP.scene.emit("facetracking_action", "resume")
+        setStatus(Status.RUNNING)
+        break
+      case Status.RUNNING:
+        APP.scene.emit("facetracking_action", "pause")
+        setStatus(Status.PAUSED)
+        break
+    }
   }
 
   /**
    * Event listeners
    */
   useEffect(() => {
-    const onInitializing = () => setInitializing(true)
-    const onInitialized = () => setInitializing(false)
+    const onInitializing = () => setStatus(Status.INITIALIZING)
+    const onInitialized = () => {
+      setStatus(Status.RUNNING)
+      setOpenPreview(true)
+    }
+    const onStop = () => {
+      setStatus(Status.STOPPED)
+      setOpenPreview(false)
+    }
     APP.scene.addEventListener("facetracking_initializing", onInitializing)
     APP.scene.addEventListener("facetracking_initialized", onInitialized)
+    APP.scene.addEventListener("facetracking_stopped", onStop)
     return () => {
       APP.scene.removeEventListener("facetracking_initializing", onInitializing)
       APP.scene.removeEventListener("facetracking_initialized", onInitialized)
+      APP.scene.removeEventListener("facetracking_stopped", onStop)
     }
   }, [])
 
   useLayoutEffect(() => {
     canvasContainer.current.appendChild(canvasEl)
   }, [canvasEl])
+
+  const displayWidget = status === Status.RUNNING || status === Status.PAUSED
+
   return (
     <>
-      <div class="absolute bottom-0 right-0 mx-12 px-4 bg-white rounded-t-xl pointer-events-auto">
+      <div
+        style={{ display: displayWidget ? "" : "none" }}
+        class="absolute bottom-0 right-0 mx-12 px-4 bg-white rounded-t-xl pointer-events-auto"
+      >
         <button class="flex fill-current text-hubs-gray justify-center w-full focus:outline-none" onClick={togglePreview}>
           <box-icon name={openPreview ? "chevron-down" : "chevron-up"}></box-icon>
         </button>
@@ -51,8 +79,8 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
           <div ref={canvasContainer} class="mb-4" />
           <div class="flex justify-center gap-2 mb-4">
             <Button onClick={onClickPause}>
-              <box-icon name={paused ? "play" : "pause"}></box-icon>
-              {paused ? "Resume" : "Pause"}
+              <box-icon name={status === Status.PAUSED ? "play" : "pause"}></box-icon>
+              {status === Status.PAUSED ? "Resume" : "Pause"}
             </Button>
             <Button onClick={() => setOpenSettings(!openSettings)}>
               <box-icon name="slider-alt"></box-icon>
@@ -61,7 +89,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
         </Collapsible>
       </div>
       {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} />}
-      {initializing && <Initializing />}
+      {status === Status.INITIALIZING && <Initializing />}
     </>
   )
 }
