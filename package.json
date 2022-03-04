@@ -1,0 +1,9 @@
+{
+  "name": "avatar-webkit-hubs",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.14.25"
+  }
+}
