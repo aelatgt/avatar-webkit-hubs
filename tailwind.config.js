@@ -1,7 +1,16 @@
 module.exports = {
   content: ["./src/**/*.{html,jsx}"],
   theme: {
-    extend: {},
+    fontFamily: {
+      sans: "Poppins, sans-serif",
+    },
+    extend: {
+      colors: {
+        "hubs-gray": "#868686",
+        "hubs-blue": "#007AB8",
+        "hubs-lightblue": "#008BD1",
+      },
+    },
   },
   plugins: [],
 }
