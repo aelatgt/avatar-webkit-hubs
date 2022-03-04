@@ -1,6 +1,6 @@
 # Setup
 
-```
+```env
 # .env.local
 AVATAR_WEBKIT_AUTH_TOKEN="..."
 ```
@@ -9,7 +9,7 @@ Assign `AVATAR_WEBKIT_REPO_SECRET` environment variable before installing depend
 
 # Development
 
-```
+```bash
 yarn
 yarn dev
 ```
