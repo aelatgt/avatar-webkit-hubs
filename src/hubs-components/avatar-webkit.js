@@ -22,8 +22,12 @@ AFRAME.registerSystem("avatar-webkit", {
     })
 
     this.predictor.onPredict = (results) => {
+      const { actionUnits, rotation } = results
       if (rpmController.supported) {
-        this.avatarRig.setAttribute("rpm-controller", results.actionUnits)
+        this.avatarRig.setAttribute("rpm-controller", {
+          ...actionUnits,
+          rotation: { x: -rotation.pitch, y: rotation.yaw, z: -rotation.roll },
+        })
       }
     }
 

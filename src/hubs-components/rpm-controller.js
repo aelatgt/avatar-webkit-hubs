@@ -1,12 +1,19 @@
 import { blendShapeNames, isValidAvatar } from "@/utils/blendshapes"
 import { registerNetworkedAvatarComponent } from "@/utils/hubs-utils"
 
+const euler = new THREE.Euler()
+
+const blendShapeSchema = Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }]))
+
 /**
  * All avatars use this component for ReadyPlayerMe avatar expressions.
  * Unsupported avatars will ignore this data.
  */
 AFRAME.registerComponent("rpm-controller", {
-  schema: Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }])),
+  schema: {
+    ...blendShapeSchema,
+    rotation: { type: "vec3" },
+  },
   init: function () {
     this.el.addEventListener("model-loaded", () => {
       this.avatarRootEl = this.el.querySelector(".AvatarRoot")
@@ -31,8 +38,9 @@ AFRAME.registerComponent("rpm-controller", {
     const bones = {
       leftEye: this.el.object3D.getObjectByName("LeftEye"),
       rightEye: this.el.object3D.getObjectByName("RightEye"),
-      head: this.el.object3D.getObjectByName("Head"),
     }
+
+    this.headQuaternion = this.avatarRootEl.components["ik-controller"].headQuaternion
 
     this.meshes = meshes
     this.bones = bones
@@ -43,6 +51,8 @@ AFRAME.registerComponent("rpm-controller", {
   },
   stopDefaultBehaviors: function () {
     if (this.supported) {
+      this.headQuaternion.identity()
+
       // Pause eye animation
       this.loopAnimation.currentActions.forEach((action) => action.stop())
 
@@ -60,12 +70,28 @@ AFRAME.registerComponent("rpm-controller", {
   },
   update: function () {
     if (this.supported) {
+      // Facial morphs
       for (let i = 0; i < this.meshes.length; ++i) {
         const mesh = this.meshes[i]
         for (let key in this.data) {
           mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = this.data[key]
         }
       }
+
+      // Head rotation
+      const rotation = this.data.rotation
+      euler.set(rotation.x, rotation.y, rotation.z)
+      this.headQuaternion.setFromEuler(euler)
+
+      // Eye rotation
+      this.bones.rightEye.rotation.set(
+        -Math.PI / 2 + this.data["eyeLookDownRight"] * 0.5 - this.data["eyeLookUpRight"] * 0.5,
+        0,
+        Math.PI - this.data["eyeLookOutRight"] + this.data["eyeLookOutLeft"]
+      )
+      this.bones.leftEye.rotation.copy(this.bones.rightEye.rotation)
+      this.bones.leftEye.updateMatrix()
+      this.bones.rightEye.updateMatrix()
     }
   },
 })
