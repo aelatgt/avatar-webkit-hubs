@@ -40,6 +40,7 @@ AFRAME.registerSystem("avatar-webkit", {
     this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
       srcVideoStream: stream,
+      fps: 30,
     })
 
     this.predictor.onPredict = (results) => {
