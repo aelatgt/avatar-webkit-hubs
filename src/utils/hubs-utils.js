@@ -21,7 +21,7 @@ export function registerDependency(baseComponent, dependentComponent) {
  * @param {any} value Initial value for the component
  */
 export function registerNetworkedAvatarComponent(name, value) {
-  const stringValue = AFRAME.utils.styleParser.stringify(value)
+  const stringValue = AFRAME.utils.styleParser.stringify(value ?? "")
 
   // Attach component locally so we can control it (since attachTemplateToLocal=false on #remote-avatar)
   document.querySelector("#avatar-rig").setAttribute(name, stringValue)
