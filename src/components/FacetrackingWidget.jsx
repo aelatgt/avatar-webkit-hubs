@@ -43,7 +43,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
   }, [canvasEl])
   return (
     <>
-      <div class="absolute bottom-0 right-0 mx-4 px-4 bg-white rounded-t-xl pointer-events-auto">
+      <div class="absolute bottom-0 right-0 mx-12 px-4 bg-white rounded-t-xl pointer-events-auto">
         <button class="flex fill-current text-hubs-gray justify-center w-full focus:outline-none" onClick={togglePreview}>
           <box-icon name={openPreview ? "chevron-down" : "chevron-up"}></box-icon>
         </button>
