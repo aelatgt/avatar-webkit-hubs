@@ -85,3 +85,6 @@ export function isValidAvatar(avatarRootEl) {
     return false
   }
 }
+
+/** @type {BlendShapes} */
+export const initialBlendShapes = Object.fromEntries(blendShapeNames.map((name) => [name, 0]))

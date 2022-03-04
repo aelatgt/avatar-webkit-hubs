@@ -1,18 +1,17 @@
-import { blendShapeNames, isValidAvatar } from "@/utils/blendshapes"
+import { blendShapeNames, initialBlendShapes, isValidAvatar } from "@/utils/blendshapes"
 import { registerNetworkedAvatarComponent } from "@/utils/hubs-utils"
-
-const euler = new THREE.Euler()
 
 const blendShapeSchema = Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }]))
 
 /**
- * All avatars use this component for ReadyPlayerMe avatar expressions.
+ * All avatars use this component for networked ReadyPlayerMe avatar expressions.
  * Unsupported avatars will ignore this data.
  */
 AFRAME.registerComponent("rpm-controller", {
   schema: {
     ...blendShapeSchema,
-    rotation: { type: "vec3" },
+    trackingIsActive: { default: false },
+    headQuaternion: { type: "vec4" },
   },
   init: function () {
     this.el.addEventListener("model-loaded", () => {
@@ -40,7 +39,7 @@ AFRAME.registerComponent("rpm-controller", {
       rightEye: this.el.object3D.getObjectByName("RightEye"),
     }
 
-    this.headQuaternion = this.avatarRootEl.components["ik-controller"].headQuaternion
+    this.headQuaternionTarget = this.avatarRootEl.components["ik-controller"].headQuaternion
 
     this.meshes = meshes
     this.bones = bones
@@ -51,8 +50,6 @@ AFRAME.registerComponent("rpm-controller", {
   },
   stopDefaultBehaviors: function () {
     if (this.supported) {
-      this.headQuaternion.identity()
-
       // Pause eye animation
       this.loopAnimation.currentActions.forEach((action) => action.stop())
 
@@ -64,24 +61,30 @@ AFRAME.registerComponent("rpm-controller", {
   },
   restartDefaultBehaviors: function () {
     if (this.supported) {
+      this.headQuaternionTarget.identity()
+      this.applyFacialMorphs(initialBlendShapes)
       this.loopAnimation.currentActions.forEach((action) => action.play())
       this.morphAudioFeedback.play()
     }
   },
-  update: function () {
-    if (this.supported) {
-      // Facial morphs
-      for (let i = 0; i < this.meshes.length; ++i) {
-        const mesh = this.meshes[i]
-        for (let key in this.data) {
-          mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = this.data[key]
-        }
+  update: function (oldData = {}) {
+    if (oldData.trackingIsActive !== this.data.trackingIsActive) {
+      if (this.data.trackingIsActive) {
+        this.stopDefaultBehaviors()
+      } else {
+        this.restartDefaultBehaviors()
       }
+    } else if (this.supported && this.data.trackingIsActive) {
+      // Facial morphs
+      this.applyFacialMorphs(this.data)
 
       // Head rotation
-      const rotation = this.data.rotation
-      euler.set(rotation.x, rotation.y, rotation.z)
-      this.headQuaternion.setFromEuler(euler)
+      this.headQuaternionTarget.set(
+        this.data.headQuaternion.x,
+        this.data.headQuaternion.y,
+        this.data.headQuaternion.z,
+        this.data.headQuaternion.w
+      )
 
       // Eye rotation
       this.bones.rightEye.rotation.set(
@@ -92,6 +95,14 @@ AFRAME.registerComponent("rpm-controller", {
       this.bones.leftEye.rotation.copy(this.bones.rightEye.rotation)
       this.bones.leftEye.updateMatrix()
       this.bones.rightEye.updateMatrix()
+    }
+  },
+  applyFacialMorphs(data) {
+    for (let i = 0; i < this.meshes.length; ++i) {
+      const mesh = this.meshes[i]
+      for (let key in blendShapeSchema) {
+        mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = data[key] ?? 0
+      }
     }
   },
 })

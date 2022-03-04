@@ -14,10 +14,6 @@ AFRAME.registerSystem("scene-overlay", {
         pointer-events: none;
         overflow: hidden;
       }
-
-      #scene-overlay > * {
-        pointer-events: auto;
-      }
     `
     document.head.appendChild(globalStyle)
 
@@ -26,6 +22,13 @@ AFRAME.registerSystem("scene-overlay", {
 
     // Create shadow DOM to prevent affecting Hubs client styles
     this.shadowRoot = this.root.attachShadow({ mode: "open" })
+    const innerStyle = document.createElement("style")
+    innerStyle.innerHTML = css`
+      * {
+        pointer-events: auto;
+      }
+    `
+    this.shadowRoot.appendChild(innerStyle)
 
     const link = document.createElement("link")
     link.href = new URL("./room.css", import.meta.url)

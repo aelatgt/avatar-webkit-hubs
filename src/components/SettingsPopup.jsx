@@ -2,7 +2,7 @@ import { Button } from "./Button"
 
 export function SettingsPopup({ onClose, onAction }) {
   return (
-    <div class="absolute w-full h-full grid place-items-center bg-black bg-opacity-30 pointer-events-auto z-20">
+    <div class="absolute w-full h-full grid place-items-center bg-black bg-opacity-30">
       <div class="bg-white rounded-xl p-8 relative max-w-xl">
         <button class="absolute top-2 right-2" onClick={onClose}>
           <box-icon name="x"></box-icon>
