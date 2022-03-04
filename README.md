@@ -1,11 +1,12 @@
 # Setup
 
-```env
-# .env.local
-AVATAR_WEBKIT_AUTH_TOKEN="..."
-```
+Configure environment variables in `.bashrc` before any NVM configuration:
 
-Assign `AVATAR_WEBKIT_REPO_SECRET` environment variable before installing dependencies.
+```bash
+# .bashrc
+export AVATAR_WEBKIT_REPO_SECRET="..."
+export AVATAR_WEBKIT_AUTH_TOKEN="..."
+```
 
 # Development
 

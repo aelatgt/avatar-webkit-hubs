@@ -1,11 +1,24 @@
 import esbuild from "esbuild"
 import postcss from "esbuild-postcss"
-import dotenv from "dotenv"
 
-const env = dotenv.config({ path: ".env.local" })
-const defineStrings = Object.fromEntries(Object.entries(env.parsed).map(([key, value]) => [key, `\"${value}\"`]))
+/**
+ * Environment variables
+ */
+const defineKeys = ["AVATAR_WEBKIT_AUTH_TOKEN"]
+const defineDictionary = {}
 
-/** @type {esbuild.BuildOptions} */
+for (let key of defineKeys) {
+  if (!(key in process.env)) {
+    throw new Error(`Missing environment variable "${key}"`)
+  }
+  defineDictionary[key] = `"${process.env[key]}"`
+}
+
+/**
+ * Shared settings for esbuild
+ *
+ * @type {esbuild.BuildOptions}
+ */
 export const buildOptions = {
   entryPoints: ["src/room.js"],
   outdir: "dist",
@@ -13,7 +26,7 @@ export const buildOptions = {
   format: "esm",
   target: "esnext",
   plugins: [postcss()],
-  define: defineStrings,
+  define: defineDictionary,
   jsxFactory: "h",
   jsxFragment: "Fragment",
   inject: ["src/preact-shim.js"],
