@@ -1,6 +1,6 @@
 # Setup
 
-Configure environment variables in `.bashrc` before any NVM configuration:
+Configure environment variables before any NVM configuration:
 
 ```bash
 # .bashrc
@@ -22,3 +22,5 @@ yarn dev
 # Rooms
 
 [Development Room](https://hubs.aelatgt.net/9fbTP4E/development-avatar-webkit/)
+
+[Production Room](https://hubs.aelatgt.net/5BwQt2g/production-avatar-webkit)
