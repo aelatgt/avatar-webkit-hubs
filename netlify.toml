@@ -1,4 +1,4 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Access-Control-Allow-Origin = "hubs.aelatgt.net"
+    Access-Control-Allow-Origin = "https://hubs.aelatgt.net"
