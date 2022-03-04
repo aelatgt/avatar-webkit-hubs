@@ -1,7 +1,12 @@
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
 
 AFRAME.registerSystem("avatar-webkit", {
+  init: function () {
+    this.avatarRig = APP.scene.querySelector("#avatar-rig")
+  },
   startPredictor: async function () {
+    const rpmController = this.avatarRig.components["rpm-controller"]
+
     const videoStream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
@@ -11,16 +16,26 @@ AFRAME.registerSystem("avatar-webkit", {
       },
     })
 
-    const predictor = new AUPredictor({
+    this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
       srcVideoStream: videoStream,
     })
 
-    predictor.onPredict = (results) => {
-      window.results = results
+    this.predictor.onPredict = (results) => {
+      if (rpmController.supported) {
+        this.avatarRig.setAttribute("rpm-controller", results.actionUnits)
+      }
     }
 
-    await predictor.start()
+    await this.predictor.start()
     console.log("Predictor started...")
+
+    rpmController.stopDefaultBehaviors()
+  },
+  stopPredictor: function () {
+    this.predictor.stop()
+
+    const rpmController = this.avatarRig.components["rpm-controller"]
+    rpmController.restartDefaultBehaviors()
   },
 })

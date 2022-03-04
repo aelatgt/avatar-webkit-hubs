@@ -40,20 +40,23 @@ AFRAME.registerComponent("rpm-controller", {
     this.morphAudioFeedback = this.avatarRootEl.querySelector("[morph-audio-feedback]").components["morph-audio-feedback"]
 
     window.debug = this
-    this.stopDefaultBehaviors()
   },
   stopDefaultBehaviors: function () {
-    // Pause eye animation
-    this.loopAnimation.currentActions.forEach((action) => action.stop())
+    if (this.supported) {
+      // Pause eye animation
+      this.loopAnimation.currentActions.forEach((action) => action.stop())
 
-    // Pause mouth feedback
-    this.morphAudioFeedback.pause()
-    const { morphs } = this.morphAudioFeedback
-    morphs.forEach(({ mesh, morphNumber }) => (mesh.morphTargetInfluences[morphNumber] = 0))
+      // Pause mouth feedback
+      this.morphAudioFeedback.pause()
+      const { morphs } = this.morphAudioFeedback
+      morphs.forEach(({ mesh, morphNumber }) => (mesh.morphTargetInfluences[morphNumber] = 0))
+    }
   },
   restartDefaultBehaviors: function () {
-    this.loopAnimation.currentActions.forEach((action) => action.play())
-    this.morphAudioFeedback.play()
+    if (this.supported) {
+      this.loopAnimation.currentActions.forEach((action) => action.play())
+      this.morphAudioFeedback.play()
+    }
   },
   update: function () {
     if (this.supported) {
