@@ -1,4 +1,4 @@
-import { blendShapeNames, isValidAvatar } from "@/utils/blendshapes"
+import { blendShapeNames, initialBlendShapes, isValidAvatar } from "@/utils/blendshapes"
 import { registerNetworkedAvatarComponent } from "@/utils/hubs-utils"
 
 const blendShapeSchema = Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }]))
@@ -50,8 +50,6 @@ AFRAME.registerComponent("rpm-controller", {
   },
   stopDefaultBehaviors: function () {
     if (this.supported) {
-      this.headQuaternionTarget.identity()
-
       // Pause eye animation
       this.loopAnimation.currentActions.forEach((action) => action.stop())
 
@@ -63,6 +61,8 @@ AFRAME.registerComponent("rpm-controller", {
   },
   restartDefaultBehaviors: function () {
     if (this.supported) {
+      this.headQuaternionTarget.identity()
+      this.applyFacialMorphs(initialBlendShapes)
       this.loopAnimation.currentActions.forEach((action) => action.play())
       this.morphAudioFeedback.play()
     }
@@ -74,16 +74,9 @@ AFRAME.registerComponent("rpm-controller", {
       } else {
         this.restartDefaultBehaviors()
       }
-    }
-
-    if (this.supported) {
+    } else if (this.supported) {
       // Facial morphs
-      for (let i = 0; i < this.meshes.length; ++i) {
-        const mesh = this.meshes[i]
-        for (let key in this.data) {
-          mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = this.data[key]
-        }
-      }
+      this.applyFacialMorphs(this.data)
 
       // Head rotation
       this.headQuaternionTarget.set(
@@ -102,6 +95,14 @@ AFRAME.registerComponent("rpm-controller", {
       this.bones.leftEye.rotation.copy(this.bones.rightEye.rotation)
       this.bones.leftEye.updateMatrix()
       this.bones.rightEye.updateMatrix()
+    }
+  },
+  applyFacialMorphs(data) {
+    for (let i = 0; i < this.meshes.length; ++i) {
+      const mesh = this.meshes[i]
+      for (let key in blendShapeSchema) {
+        mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = data[key] ?? 0
+      }
     }
   },
 })
