@@ -1,6 +1,7 @@
+import esbuild from "esbuild"
 import postcss from "esbuild-postcss"
 
-/** @type {import('esbuild').BuildOptions} */
+/** @type {esbuild.BuildOptions} */
 export const buildOptions = {
   entryPoints: ["src/room.js"],
   outdir: "dist",
