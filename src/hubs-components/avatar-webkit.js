@@ -1,24 +1,30 @@
+import { startMediaStream } from "@/utils/media-stream"
+import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
 
 AFRAME.registerSystem("avatar-webkit", {
   init: function () {
     this.avatarRig = APP.scene.querySelector("#avatar-rig")
-  },
-  startPredictor: async function () {
-    const rpmController = this.avatarRig.components["rpm-controller"]
 
-    const videoStream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: {
-        width: { ideal: 640 },
-        height: { ideal: 360 },
-        facingMode: "user",
-      },
+    withFaceButton((button) => {
+      button.onclick = () => {
+        this.startPredictor()
+        startMediaStream((stream) => {
+          this.startPredictor(stream)
+        })
+      }
     })
+
+    this.el.sceneEl.addEventListener("action_end_video_sharing", () => {
+      this.stopPredictor()
+    })
+  },
+  startPredictor: async function (stream) {
+    const rpmController = this.avatarRig.components["rpm-controller"]
 
     this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
-      srcVideoStream: videoStream,
+      srcVideoStream: stream,
     })
 
     this.predictor.onPredict = (results) => {
