@@ -1,7 +1,7 @@
 import { blendShapeNames, initialBlendShapes, isValidAvatar } from "@/utils/blendshapes"
 import { registerNetworkedAvatarComponent } from "@/utils/hubs-utils"
 
-import "./aura"
+import "./expression-extensions"
 
 const blendShapeSchema = Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }]))
 
@@ -48,10 +48,10 @@ AFRAME.registerComponent("rpm-controller", {
     this.loopAnimation = this.avatarRootEl.parentEl.components["loop-animation"]
     this.morphAudioFeedback = this.avatarRootEl.querySelector("[morph-audio-feedback]").components["morph-audio-feedback"]
 
-    // Set up aura
-    this.auraEl = document.createElement("a-entity")
-    this.auraEl.setAttribute("aura", { size: 0, color: "yellow" })
-    this.el.querySelector(".Head").appendChild(this.auraEl)
+    // Set up expression extensions (aura, particles)
+    this.extensionsEl = document.createElement("a-entity")
+    this.extensionsEl.setAttribute("expression-extensions", "")
+    this.el.querySelector(".Head").appendChild(this.extensionsEl)
 
     window.debug = this
   },
@@ -112,13 +112,9 @@ AFRAME.registerComponent("rpm-controller", {
       }
     }
 
-    // Update aura from face morphs
     const negativeInfluence = (data.mouthFrownLeft + data.mouthFrownRight) * 0.5
     const positiveInfluence = (data.mouthSmileLeft + data.mouthSmileRight) * 0.5
-    this.auraEl.setAttribute("aura", {
-      size: Math.max(negativeInfluence, positiveInfluence),
-      color: positiveInfluence > negativeInfluence ? "#f5f242" : "#c8dff7",
-    })
+    this.extensionsEl.setAttribute("expression-extensions", { negativeInfluence, positiveInfluence })
   },
 })
 
