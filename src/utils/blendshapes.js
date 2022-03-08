@@ -5,15 +5,18 @@
 
 export const blendShapeNames = /** @type {const} */ ([
   "browDownLeft",
-  "browDownRight",
-  "browInnerUp",
-  "browOuterUpLeft",
-  "browOuterUpRight",
-  "cheekPuff",
   "cheekSquintLeft",
+  "browOuterUpLeft",
+  "browDownRight",
+  "browOuterUpRight",
   "cheekSquintRight",
+  "browInnerUp",
   "eyeBlinkLeft",
   "eyeBlinkRight",
+  "eyeSquintLeft",
+  "eyeSquintRight",
+  "eyeWideLeft",
+  "eyeWideRight",
   "eyeLookDownLeft",
   "eyeLookDownRight",
   "eyeLookInLeft",
@@ -22,40 +25,40 @@ export const blendShapeNames = /** @type {const} */ ([
   "eyeLookOutRight",
   "eyeLookUpLeft",
   "eyeLookUpRight",
-  "eyeSquintLeft",
-  "eyeSquintRight",
-  "eyeWideLeft",
-  "eyeWideRight",
-  "jawForward",
-  "jawLeft",
   "jawOpen",
+  "jawLeft",
   "jawRight",
   "mouthClose",
-  "mouthDimpleLeft",
-  "mouthDimpleRight",
-  "mouthFrownLeft",
-  "mouthFrownRight",
   "mouthFunnel",
-  "mouthLeft",
-  "mouthLowerDownLeft",
-  "mouthLowerDownRight",
-  "mouthPressLeft",
-  "mouthPressRight",
   "mouthPucker",
-  "mouthRight",
   "mouthRollLower",
   "mouthRollUpper",
   "mouthShrugLower",
   "mouthShrugUpper",
-  "mouthSmileLeft",
-  "mouthSmileRight",
-  "mouthStretchLeft",
-  "mouthStretchRight",
-  "mouthUpperUpLeft",
-  "mouthUpperUpRight",
   "noseSneerLeft",
   "noseSneerRight",
+  "mouthLeft",
+  "mouthRight",
+  "mouthSmileLeft",
+  "mouthSmileRight",
+  "mouthFrownLeft",
+  "mouthFrownRight",
+  "mouthDimpleLeft",
+  "mouthDimpleRight",
+  "mouthStretchLeft",
+  "mouthStretchRight",
+  "mouthPressLeft",
+  "mouthPressRight",
+  "mouthLowerDownLeft",
+  "mouthLowerDownRight",
+  "mouthUpperUpLeft",
+  "mouthUpperUpRight",
 ])
+
+// Set of blendShapeNames excluding frequently changing eye values
+const stableBlendShapes = blendShapeNames.filter((name) => !name.includes("eye"))
+
+Object.assign(window, { blendShapeNames, stableBlendShapes })
 
 /**
  * Test is the provided object contains the necessary
@@ -88,3 +91,36 @@ export function isValidAvatar(avatarRootEl) {
 
 /** @type {BlendShapes} */
 export const initialBlendShapes = Object.fromEntries(blendShapeNames.map((name) => [name, 0]))
+
+/**
+ * @param {BlendShapes} blendShapesA
+ * @param {BlendShapes} blendShapesB
+ */
+export function computeSimilarity(blendShapesA, blendShapesB) {
+  let diff = 0
+  for (let i = 0; i < stableBlendShapes.length; ++i) {
+    const name = stableBlendShapes[i]
+    diff -= Math.abs((blendShapesA[name] ?? 0) - (blendShapesB[name] ?? 0))
+  }
+  return diff
+}
+
+// https://gist.github.com/cyphunk/6c255fa05dd30e69f438a930faeb53fe?permalink_comment_id=3649882#gistcomment-3649882
+function softmax(logits) {
+  const maxLogit = Math.max(...logits)
+  const scores = logits.map((l) => Math.exp(l - maxLogit))
+  const denom = scores.reduce((a, b) => a + b)
+  return scores.map((s) => s / denom)
+}
+
+/**
+ * @param {BlendShapes} blendShapes
+ * @param {BlendShapes[]} baselines
+ */
+export function computeSimilarityVector(blendShapes, baselines) {
+  const distances = []
+  for (let i = 0; i < baselines.length; ++i) {
+    distances[i] = computeSimilarity(blendShapes, baselines[i])
+  }
+  return softmax(distances)
+}

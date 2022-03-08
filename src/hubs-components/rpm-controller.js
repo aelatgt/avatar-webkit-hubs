@@ -14,6 +14,9 @@ AFRAME.registerComponent("rpm-controller", {
     ...blendShapeSchema,
     trackingIsActive: { default: false },
     headQuaternion: { type: "vec4" },
+    similarityNeutral: { type: "number" },
+    similarityNegative: { type: "number" },
+    similarityPositive: { type: "number" },
   },
   init: function () {
     this.el.addEventListener("model-loaded", () => {
@@ -53,7 +56,7 @@ AFRAME.registerComponent("rpm-controller", {
     this.extensionsEl.setAttribute("expression-extensions", "")
     this.el.querySelector(".Head").appendChild(this.extensionsEl)
 
-    window.debug = this
+    window.rpmController = this
   },
   stopDefaultBehaviors: function () {
     if (this.supported) {
@@ -112,9 +115,10 @@ AFRAME.registerComponent("rpm-controller", {
       }
     }
 
-    const negativeInfluence = (data.mouthFrownLeft + data.mouthFrownRight) * 0.5
-    const positiveInfluence = (data.mouthSmileLeft + data.mouthSmileRight) * 0.5
-    this.extensionsEl.setAttribute("expression-extensions", { negativeInfluence, positiveInfluence })
+    this.extensionsEl.setAttribute("expression-extensions", {
+      negativeInfluence: data.similarityNegative,
+      positiveInfluence: data.similarityPositive,
+    })
   },
 })
 

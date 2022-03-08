@@ -33,7 +33,6 @@ AFRAME.registerComponent("expression-extensions", {
     this.el.setAttribute("particle-emitter", particleSettings)
 
     this.plane = plane
-    window.debug = this
   },
   update: function () {
     const size = Math.max(this.data.negativeInfluence, this.data.positiveInfluence)

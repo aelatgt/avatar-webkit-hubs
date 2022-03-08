@@ -16,13 +16,16 @@ export function SettingsPopup({ onClose, onAction }) {
             <box-icon name="target-lock"></box-icon>Recenter Head
           </Button>
         </div>
-        <p class="mt-8">
-          To calibrate your avatar's neutral facial expression,{" "}
-          <b>adjust your real-world facial expression until the avatar preview appears neutral</b>, then click the button below.
-        </p>
-        <div class="my-2 flex justify-center">
+        <p class="mt-8">Expression calibration</p>
+        <div class="my-2 flex justify-center gap-2">
+          <Button onClick={() => onAction("calibrate_negative")}>
+            <box-icon name="sad"></box-icon>
+          </Button>
           <Button onClick={() => onAction("calibrate_neutral")}>
-            <box-icon name="meh"></box-icon>Calibrate
+            <box-icon name="meh"></box-icon>
+          </Button>
+          <Button onClick={() => onAction("calibrate_positive")}>
+            <box-icon name="happy"></box-icon>
           </Button>
         </div>
       </div>

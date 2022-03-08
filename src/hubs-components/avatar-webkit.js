@@ -1,3 +1,4 @@
+import { computeSimilarityVector, initialBlendShapes } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -7,11 +8,17 @@ const quaternion = new THREE.Quaternion()
 
 AFRAME.registerSystem("avatar-webkit", {
   init: function () {
+    window.avatarWebkit = this
+
     this.avatarRig = APP.scene.querySelector("#avatar-rig")
 
     this.headCalibration = new THREE.Quaternion()
+    this.baselineNeutral = { ...initialBlendShapes }
+    this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
+    this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
 
     this.rawHeadOrientation = new THREE.Quaternion()
+    this.rawActionUnits = { ...initialBlendShapes }
 
     withFaceButton((button) => {
       button.onclick = () => {
@@ -30,9 +37,19 @@ AFRAME.registerSystem("avatar-webkit", {
     })
 
     this.el.sceneEl.addEventListener("facetracking_action", (e) => {
+      console.log("facetracking_action", e.detail)
       switch (e.detail) {
         case "calibrate_center":
           this.headCalibration.copy(this.rawHeadOrientation).invert()
+          break
+        case "calibrate_neutral":
+          Object.assign(this.baselineNeutral, this.rawActionUnits)
+          break
+        case "calibrate_negative":
+          Object.assign(this.baselineNegative, this.rawActionUnits)
+          break
+        case "calibrate_positive":
+          Object.assign(this.baselinePositive, this.rawActionUnits)
           break
         case "pause":
           this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: false })
@@ -62,6 +79,13 @@ AFRAME.registerSystem("avatar-webkit", {
       }
       const { actionUnits, rotation } = results
       if (rpmController.supported) {
+        this.rawActionUnits = actionUnits
+        const [similarityNeutral, similarityNegative, similarityPositive] = computeSimilarityVector(actionUnits, [
+          this.baselineNeutral,
+          this.baselineNegative,
+          this.baselinePositive,
+        ])
+
         // Convert head rotation from pitch / yaw / roll to quaternion
         euler.set(-rotation.pitch, rotation.yaw, -rotation.roll)
         this.rawHeadOrientation.setFromEuler(euler)
@@ -71,6 +95,9 @@ AFRAME.registerSystem("avatar-webkit", {
         this.avatarRig.setAttribute("rpm-controller", {
           ...actionUnits,
           headQuaternion: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
+          similarityNeutral,
+          similarityNegative,
+          similarityPositive,
         })
       }
     }
