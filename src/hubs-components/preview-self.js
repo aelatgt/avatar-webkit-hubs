@@ -1,6 +1,6 @@
 const tmpSize = new THREE.Vector2()
 
-const PREVIEW_LAYER = 10
+const LAYER_PREVIEW = 10
 const SIZE = 256
 
 AFRAME.registerSystem("preview-self", {
@@ -14,7 +14,7 @@ AFRAME.registerSystem("preview-self", {
 
     // Create a camera facing the user that only "sees" a specific layer
     const camera = new THREE.PerspectiveCamera(10, 1, 0.1, 1000)
-    camera.layers.set(PREVIEW_LAYER)
+    camera.layers.set(LAYER_PREVIEW)
     camera.position.z = -2
     camera.rotation.y = Math.PI
     camera.updateMatrix()
@@ -28,9 +28,9 @@ AFRAME.registerSystem("preview-self", {
      * in the avatar glTF and on each light in the scene
      */
     avatarModelEl.addEventListener("model-loaded", () => {
-      avatarModelEl.object3D.traverse((o) => o.layers.enable(PREVIEW_LAYER))
-      this.el.sceneEl.object3D.traverse((o) => o.isLight && o.layers.enable(PREVIEW_LAYER))
-      document.querySelector("[skybox]").object3D.traverse((o) => o.layers.enable(PREVIEW_LAYER))
+      avatarModelEl.object3D.traverse((o) => o.layers.enable(LAYER_PREVIEW))
+      this.el.sceneEl.object3D.traverse((o) => o.isLight && o.layers.enable(LAYER_PREVIEW))
+      document.querySelector("[skybox]").object3D.traverse((o) => o.layers.enable(LAYER_PREVIEW))
     })
 
     /**
