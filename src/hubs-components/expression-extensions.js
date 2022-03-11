@@ -24,23 +24,34 @@ AFRAME.registerComponent("expression-extensions", {
     negativeInfluence: { default: 0 },
   },
   init: function () {
-    const plane = document.createElement("a-entity")
-    plane.setAttribute("geometry", { primitive: "plane" })
-    plane.setAttribute("material", { shader: "aura", transparent: true })
-    plane.setAttribute("position", { z: -0.2 })
-    this.el.appendChild(plane)
+    const auraEl = document.createElement("a-entity")
+    auraEl.setAttribute("geometry", { primitive: "plane" })
+    auraEl.setAttribute("material", { shader: "aura", transparent: true })
+    auraEl.setAttribute("position", { z: -0.2 })
+    auraEl.setAttribute("visible", false)
 
-    this.el.setAttribute("particle-emitter", particleSettings)
+    const particlesEl = document.createElement("a-entity")
+    particlesEl.setAttribute("particle-emitter", particleSettings)
+    particlesEl.setAttribute("visible", false)
 
-    this.plane = plane
+    this.el.appendChild(auraEl)
+    this.el.appendChild(particlesEl)
+
+    this.el.sceneEl.addEventListener("extensions_setvisible", (e) => {
+      auraEl.setAttribute("visible", e.detail.aura)
+      particlesEl.setAttribute("visible", e.detail.particles)
+    })
+
+    this.auraEl = auraEl
+    this.particlesEl = particlesEl
   },
   update: function () {
     const size = Math.max(this.data.negativeInfluence, this.data.positiveInfluence)
     const color = this.data.positiveInfluence > this.data.negativeInfluence ? "#f5f242" : "#c8dff7"
-    this.plane.setAttribute("material", { color, size })
+    this.auraEl.setAttribute("material", { color, size })
 
     const src = this.data.positiveInfluence > this.data.negativeInfluence ? twemojiSmile : twemojiFrown
-    this.el.setAttribute("particle-emitter", { src, startOpacity: size, middleOpacity: size, endOpacity: 0 })
+    this.particlesEl.setAttribute("particle-emitter", { src, startOpacity: size, middleOpacity: size, endOpacity: 0 })
   },
 })
 
