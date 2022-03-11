@@ -1,10 +1,11 @@
 import "./scene-overlay"
 import "./preview-self"
+import "./avatar-webkit"
 import { render, h } from "preact"
 import { FacetrackingWidget } from "../components/FacetrackingWidget"
 
 AFRAME.registerSystem("facetracking-widget", {
-  dependencies: ["scene-overlay", "preview-self"],
+  dependencies: ["scene-overlay", "preview-self", "avatar-webkit"],
   schema: {
     paused: { default: false },
   },
@@ -16,13 +17,14 @@ AFRAME.registerSystem("facetracking-widget", {
 
     const sceneOverlay = this.el.sceneEl.systems["scene-overlay"]
     const previewSelf = this.el.sceneEl.systems["preview-self"]
+    const avatarWebkit = this.el.sceneEl.systems["avatar-webkit"]
+
     previewSelf.canvas.style.transform = "scaleX(-1)" // Mirror self preview
 
     const preactRoot = document.createElement("div")
 
     function onPreviewVisibilityChange({ open }) {
       previewSelf.enabled = open
-      console.log(open ? "enabling preview" : "disabling preview")
     }
     function onAction(action) {
       sceneEl.emit("facetracking_action", action)
@@ -33,6 +35,7 @@ AFRAME.registerSystem("facetracking-widget", {
       canvasEl: previewSelf.canvas,
       onPreviewVisibilityChange,
       onAction,
+      initialIntensities: avatarWebkit.intensities,
     }
     render(h(FacetrackingWidget, props, null), preactRoot)
 

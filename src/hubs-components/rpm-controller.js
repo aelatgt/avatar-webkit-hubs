@@ -1,6 +1,8 @@
 import { blendShapeNames, initialBlendShapes, isValidAvatar } from "@/utils/blendshapes"
 import { registerNetworkedAvatarComponent } from "@/utils/hubs-utils"
 
+import "./expression-extensions"
+
 const blendShapeSchema = Object.fromEntries(blendShapeNames.map((name) => [name, { default: 0 }]))
 
 /**
@@ -12,6 +14,9 @@ AFRAME.registerComponent("rpm-controller", {
     ...blendShapeSchema,
     trackingIsActive: { default: false },
     headQuaternion: { type: "vec4" },
+    similarityNeutral: { type: "number" },
+    similarityNegative: { type: "number" },
+    similarityPositive: { type: "number" },
   },
   init: function () {
     this.el.addEventListener("model-loaded", () => {
@@ -46,7 +51,12 @@ AFRAME.registerComponent("rpm-controller", {
     this.loopAnimation = this.avatarRootEl.parentEl.components["loop-animation"]
     this.morphAudioFeedback = this.avatarRootEl.querySelector("[morph-audio-feedback]").components["morph-audio-feedback"]
 
-    window.debug = this
+    // Set up expression extensions (aura, particles)
+    this.extensionsEl = document.createElement("a-entity")
+    this.extensionsEl.setAttribute("expression-extensions", "")
+    this.el.querySelector(".Head").appendChild(this.extensionsEl)
+
+    window.rpmController = this
   },
   stopDefaultBehaviors: function () {
     if (this.supported) {
@@ -104,6 +114,11 @@ AFRAME.registerComponent("rpm-controller", {
         mesh.morphTargetInfluences[mesh.morphTargetDictionary[key]] = data[key] ?? 0
       }
     }
+
+    this.extensionsEl.setAttribute("expression-extensions", {
+      negativeInfluence: data.similarityNegative,
+      positiveInfluence: data.similarityPositive,
+    })
   },
 })
 

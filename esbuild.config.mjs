@@ -27,6 +27,7 @@ export const buildOptions = {
   target: "esnext",
   plugins: [postcss()],
   define: defineDictionary,
+  loader: { ".png": "dataurl" },
   jsxFactory: "h",
   jsxFragment: "Fragment",
   inject: ["src/preact-shim.js"],
