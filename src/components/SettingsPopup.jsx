@@ -1,7 +1,14 @@
 import { geometryBlendShapes } from "@/utils/blendshapes"
+import { useState } from "preact/hooks"
 import { Button } from "./Button"
 
-export function SettingsPopup({ onClose, onAction }) {
+export function SettingsPopup({ onClose, onAction, initialIntensities }) {
+  const [intensities, setIntensities] = useState(initialIntensities)
+  const setIntensity = (name, intensity) => {
+    const newIntensities = { ...intensities, [name]: intensity }
+    onAction({ type: "set_intensities", payload: intensities })
+    setIntensities(newIntensities)
+  }
   return (
     <div class="absolute w-full h-full grid place-items-center bg-black bg-opacity-30">
       <div class="bg-white rounded-xl p-8 relative max-w-xl">
@@ -13,19 +20,19 @@ export function SettingsPopup({ onClose, onAction }) {
           To correct your avatar's head orientation, <b>look towards the center of your monitor</b> and click the button below.
         </p>
         <div class="my-2 flex justify-center">
-          <Button onClick={() => onAction("calibrate_center")}>
+          <Button onClick={() => onAction({ type: "calibrate_center" })}>
             <box-icon name="target-lock"></box-icon>Recenter Head
           </Button>
         </div>
         <p class="mb-2 mt-8 text-xl font-bold">Aura calibration</p>
         <div class="my-2 flex justify-center gap-2">
-          <Button onClick={() => onAction("calibrate_negative")}>
+          <Button onClick={() => onAction({ type: "calibrate_negative" })}>
             <box-icon name="sad"></box-icon>
           </Button>
-          <Button onClick={() => onAction("calibrate_neutral")}>
+          <Button onClick={() => onAction({ type: "calibrate_neutral" })}>
             <box-icon name="meh"></box-icon>
           </Button>
-          <Button onClick={() => onAction("calibrate_positive")}>
+          <Button onClick={() => onAction({ type: "calibrate_positive" })}>
             <box-icon name="happy"></box-icon>
           </Button>
         </div>
@@ -38,11 +45,11 @@ export function SettingsPopup({ onClose, onAction }) {
                 <input
                   id={`${name}Calibration`}
                   type="range"
-                  value={1}
+                  value={intensities[name]}
                   min={0}
                   max={1}
                   step={0.01}
-                  onInput={(e) => console.log(name, e.target.value)}
+                  onInput={(e) => setIntensity(name, e.target.value)}
                 />
               </>
             ))}

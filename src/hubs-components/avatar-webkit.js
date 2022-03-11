@@ -1,4 +1,4 @@
-import { computeSimilarityVector, initialBlendShapes } from "@/utils/blendshapes"
+import { computeSimilarityVector, geometryBlendShapes, initialBlendShapes } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -16,6 +16,7 @@ AFRAME.registerSystem("avatar-webkit", {
     this.baselineNeutral = { ...initialBlendShapes }
     this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
     this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
+    this.intensities = Object.fromEntries(geometryBlendShapes.map((name) => [name, 1]))
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
@@ -37,8 +38,7 @@ AFRAME.registerSystem("avatar-webkit", {
     })
 
     this.el.sceneEl.addEventListener("facetracking_action", (e) => {
-      console.log("facetracking_action", e.detail)
-      switch (e.detail) {
+      switch (e.detail.type) {
         case "calibrate_center":
           this.headCalibration.copy(this.rawHeadOrientation).invert()
           break
@@ -57,6 +57,9 @@ AFRAME.registerSystem("avatar-webkit", {
         case "resume":
           this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
           break
+        case "set_intensities":
+          const intensities = e.detail.payload
+          Object.assign(this.intensities, intensities)
       }
     })
   },

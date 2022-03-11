@@ -12,7 +12,7 @@ const Status = {
   PAUSED: 3,
 }
 
-export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction }) {
+export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialIntensities }) {
   const canvasContainer = useRef()
 
   const [openSettings, setOpenSettings] = useState(false)
@@ -27,11 +27,11 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
   const onClickPause = () => {
     switch (status) {
       case Status.PAUSED:
-        APP.scene.emit("facetracking_action", "resume")
+        onAction({ type: "resume" })
         setStatus(Status.RUNNING)
         break
       case Status.RUNNING:
-        APP.scene.emit("facetracking_action", "pause")
+        onAction({ type: "pause" })
         setStatus(Status.PAUSED)
         break
     }
@@ -88,7 +88,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
           </div>
         </Collapsible>
       </div>
-      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} />}
+      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialIntensities={initialIntensities} />}
       {status === Status.INITIALIZING && <Initializing />}
     </>
   )
