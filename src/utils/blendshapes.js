@@ -124,3 +124,14 @@ export function computeSimilarityVector(blendShapes, baselines) {
   }
   return softmax(distances)
 }
+
+/**
+ *
+ * @param {BlendShapes} blendShapes
+ * @param {BlendShapes} intensities
+ */
+export function applyIntensities(blendShapes, intensities) {
+  for (let name in intensities) {
+    blendShapes[name] *= intensities[name]
+  }
+}

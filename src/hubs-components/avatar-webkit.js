@@ -1,4 +1,4 @@
-import { computeSimilarityVector, geometryBlendShapes, initialBlendShapes } from "@/utils/blendshapes"
+import { applyIntensities, computeSimilarityVector, geometryBlendShapes, initialBlendShapes } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -88,6 +88,7 @@ AFRAME.registerSystem("avatar-webkit", {
           this.baselineNegative,
           this.baselinePositive,
         ])
+        applyIntensities(actionUnits, this.intensities)
 
         // Convert head rotation from pitch / yaw / roll to quaternion
         euler.set(-rotation.pitch, rotation.yaw, -rotation.roll)
