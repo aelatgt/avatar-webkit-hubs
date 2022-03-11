@@ -55,10 +55,10 @@ export const blendShapeNames = /** @type {const} */ ([
   "mouthUpperUpRight",
 ])
 
-// Set of blendShapeNames excluding frequently changing eye values
-const stableBlendShapes = blendShapeNames.filter((name) => !name.includes("eye"))
+// Subset of blendShapes that impacts face geometry
+export const geometryBlendShapes = blendShapeNames.filter((name) => !name.includes("eyeLook"))
 
-Object.assign(window, { blendShapeNames, stableBlendShapes })
+Object.assign(window, { blendShapeNames, geometryBlendShapes })
 
 /**
  * Test is the provided object contains the necessary
@@ -98,8 +98,8 @@ export const initialBlendShapes = Object.fromEntries(blendShapeNames.map((name) 
  */
 export function computeSimilarity(blendShapesA, blendShapesB) {
   let diff = 0
-  for (let i = 0; i < stableBlendShapes.length; ++i) {
-    const name = stableBlendShapes[i]
+  for (let i = 0; i < geometryBlendShapes.length; ++i) {
+    const name = geometryBlendShapes[i]
     diff -= Math.abs((blendShapesA[name] ?? 0) - (blendShapesB[name] ?? 0))
   }
   return diff

@@ -1,3 +1,4 @@
+import { geometryBlendShapes } from "@/utils/blendshapes"
 import { Button } from "./Button"
 
 export function SettingsPopup({ onClose, onAction }) {
@@ -16,7 +17,7 @@ export function SettingsPopup({ onClose, onAction }) {
             <box-icon name="target-lock"></box-icon>Recenter Head
           </Button>
         </div>
-        <p class="mt-8">Expression calibration</p>
+        <p class="mb-2 mt-8 text-xl font-bold">Aura calibration</p>
         <div class="my-2 flex justify-center gap-2">
           <Button onClick={() => onAction("calibrate_negative")}>
             <box-icon name="sad"></box-icon>
@@ -27,6 +28,25 @@ export function SettingsPopup({ onClose, onAction }) {
           <Button onClick={() => onAction("calibrate_positive")}>
             <box-icon name="happy"></box-icon>
           </Button>
+        </div>
+        <p class="mb-2 mt-8 text-xl font-bold">Shape intensities</p>
+        <div class="max-h-72 overflow-y-scroll">
+          <div class="grid grid-cols-2 max-w-sm gap-y-2 items-center my-2">
+            {geometryBlendShapes.map((name) => (
+              <>
+                <label htmlFor={`${name}Calibration`}>{name}</label>
+                <input
+                  id={`${name}Calibration`}
+                  type="range"
+                  value={1}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onInput={(e) => console.log(name, e.target.value)}
+                />
+              </>
+            ))}
+          </div>
         </div>
       </div>
     </div>

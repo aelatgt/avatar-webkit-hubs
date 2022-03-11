@@ -5,3 +5,22 @@
 box-icon {
   fill: currentColor;
 }
+
+/* Mimic blue thumb from Hubs styles */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background-color: rgb(200, 200, 200);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #008bd1;
+  overflow: visible;
+  cursor: pointer;
+}
