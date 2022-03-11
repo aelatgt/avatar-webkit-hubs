@@ -17,6 +17,8 @@ const particleSettings = {
   endOpacity: 0,
 }
 
+const SIMILARITY_THRESHOLD = 0.5
+
 AFRAME.registerComponent("expression-extensions", {
   dependencies: ["billboard"],
   schema: {
@@ -31,8 +33,14 @@ AFRAME.registerComponent("expression-extensions", {
     auraEl.setAttribute("visible", false)
 
     const particlesEl = document.createElement("a-entity")
-    particlesEl.setAttribute("particle-emitter", particleSettings)
     particlesEl.setAttribute("visible", false)
+    const particlesPositiveEl = document.createElement("a-entity")
+    const particlesNegativeEl = document.createElement("a-entity")
+
+    particlesPositiveEl.setAttribute("particle-emitter", { ...particleSettings, src: twemojiSmile })
+    particlesNegativeEl.setAttribute("particle-emitter", { ...particleSettings, src: twemojiFrown })
+    particlesEl.appendChild(particlesPositiveEl)
+    particlesEl.appendChild(particlesNegativeEl)
 
     this.el.appendChild(auraEl)
     this.el.appendChild(particlesEl)
@@ -42,18 +50,32 @@ AFRAME.registerComponent("expression-extensions", {
       particlesEl.setAttribute("visible", e.detail.particles)
     })
 
-    this.auraEl = auraEl
-    this.particlesEl = particlesEl
+    Object.assign(this, { auraEl, particlesPositiveEl, particlesNegativeEl })
   },
   update: function () {
-    const size = Math.max(this.data.negativeInfluence, this.data.positiveInfluence)
+    let size = Math.max(this.data.negativeInfluence, this.data.positiveInfluence)
+    size = remapSimilarity(size)
     const color = this.data.positiveInfluence > this.data.negativeInfluence ? "#f5f242" : "#c8dff7"
     this.auraEl.setAttribute("material", { color, size })
 
-    const src = this.data.positiveInfluence > this.data.negativeInfluence ? twemojiSmile : twemojiFrown
-    this.particlesEl.setAttribute("particle-emitter", { src, startOpacity: size, middleOpacity: size, endOpacity: 0 })
+    const opacityPositive = remapSimilarity(this.data.positiveInfluence)
+    const opacityNegative = remapSimilarity(this.data.negativeInfluence)
+    this.particlesPositiveEl.setAttribute("particle-emitter", {
+      startOpacity: opacityPositive,
+      middleOpacity: opacityPositive,
+      endOpacity: 0,
+    })
+    this.particlesNegativeEl.setAttribute("particle-emitter", {
+      startOpacity: opacityNegative,
+      middleOpacity: opacityNegative,
+      endOpacity: 0,
+    })
   },
 })
+
+function remapSimilarity(value) {
+  return Math.max(0, (value - SIMILARITY_THRESHOLD) / (1 - SIMILARITY_THRESHOLD))
+}
 
 AFRAME.registerShader("aura", {
   schema: {
