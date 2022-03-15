@@ -1,4 +1,4 @@
-import { applyIntensities, computeSimilarityVector, geometryBlendShapes, initialBlendShapes } from "@/utils/blendshapes"
+import { applyIntensities, computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -16,17 +16,26 @@ AFRAME.registerSystem("avatar-webkit", {
     this.baselineNeutral = { ...initialBlendShapes }
     this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
     this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
-    this.intensities = Object.fromEntries(geometryBlendShapes.map((name) => [name, 1]))
+    this.intensities = Object.fromEntries(geometryBlendShapesDesymmetrized.map((name) => [name, 1]))
+    this.intensities["mouthSmile"] = 0.6
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
 
+    this.el.addEventListener("share_video_failed", () => {
+      alert("Failed to start webcam, have you granted camera permissions?")
+    })
+
     withFaceButton((button) => {
       button.onclick = () => {
-        this.startPredictor()
-        startMediaStream((stream) => {
+        const onStreamSuccess = (stream) => {
           this.startPredictor(stream)
-        })
+        }
+        const onStreamError = (error) => {
+          // This doesn't seem to ever run, hence the "share_video_failed" listener
+          console.error(error)
+        }
+        startMediaStream(onStreamSuccess, onStreamError)
         this.el.sceneEl.addEventListener(
           "action_end_video_sharing",
           () => {
@@ -60,11 +69,17 @@ AFRAME.registerSystem("avatar-webkit", {
         case "set_intensities":
           const intensities = e.detail.payload
           Object.assign(this.intensities, intensities)
+          break
+        case "stop":
+          this.stopAll()
+          break
       }
     })
   },
   startPredictor: async function (stream) {
     const rpmController = this.avatarRig.components["rpm-controller"]
+
+    this.el.sceneEl.emit("facetracking_initializing", "Loading face tracker model...")
 
     this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
@@ -73,7 +88,6 @@ AFRAME.registerSystem("avatar-webkit", {
     })
 
     let started = false
-    this.el.sceneEl.emit("facetracking_initializing")
 
     this.predictor.onPredict = (results) => {
       if (!started) {
@@ -106,14 +120,22 @@ AFRAME.registerSystem("avatar-webkit", {
       }
     }
 
-    await this.predictor.start()
-    console.log("Predictor started...")
-
-    this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
+    try {
+      await this.predictor.start()
+      this.el.sceneEl.emit("facetracking_initializing", "Looking for a face...")
+      this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
+    } catch (e) {
+      this.stopAll()
+      alert("There was a problem while initializing the face tracker. Try again in a bit?")
+    }
   },
   stopPredictor: function () {
     this.predictor.stop()
     this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: false })
     this.el.sceneEl.emit("facetracking_stopped")
+  },
+  stopAll: function () {
+    this.stopPredictor()
+    this.el.sceneEl.emit("action_end_video_sharing")
   },
 })

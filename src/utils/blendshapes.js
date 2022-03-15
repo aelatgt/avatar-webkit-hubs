@@ -58,7 +58,13 @@ export const blendShapeNames = /** @type {const} */ ([
 // Subset of blendShapes that impacts face geometry
 export const geometryBlendShapes = blendShapeNames.filter((name) => !name.includes("eyeLook"))
 
-Object.assign(window, { blendShapeNames, geometryBlendShapes })
+// Maps e.g. "mouthSmileLeft" to just "mouthSmile"
+export const desymmetrizeMap = Object.fromEntries(blendShapeNames.map((name) => [name, name.replace(/Left|Right/, "")]))
+
+// Mutation of geometryBlendShapes to remove symmetry info,
+export const geometryBlendShapesDesymmetrized = Array.from(new Set(geometryBlendShapes.map((name) => desymmetrizeMap[name])))
+
+Object.assign(window, { blendShapeNames, geometryBlendShapes, geometryBlendShapesDesymmetrized, desymmetrizeMap })
 
 /**
  * Test is the provided object contains the necessary
@@ -128,10 +134,10 @@ export function computeSimilarityVector(blendShapes, baselines) {
 /**
  *
  * @param {BlendShapes} blendShapes
- * @param {BlendShapes} intensities
+ * @param {{[name: string]: number}} intensities - E.g. { "mouthSmile": 1 }
  */
 export function applyIntensities(blendShapes, intensities) {
-  for (let name in intensities) {
-    blendShapes[name] *= intensities[name]
+  for (let name in blendShapes) {
+    blendShapes[name] *= intensities[desymmetrizeMap[name]] ?? 1
   }
 }
