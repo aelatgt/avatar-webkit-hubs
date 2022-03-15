@@ -69,6 +69,10 @@ AFRAME.registerSystem("avatar-webkit", {
         case "set_intensities":
           const intensities = e.detail.payload
           Object.assign(this.intensities, intensities)
+          break
+        case "stop":
+          this.stopAll()
+          break
       }
     })
   },
@@ -121,8 +125,7 @@ AFRAME.registerSystem("avatar-webkit", {
       this.el.sceneEl.emit("facetracking_initializing", "Looking for a face...")
       this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
     } catch (e) {
-      this.el.sceneEl.emit("action_end_video_sharing")
-      this.el.sceneEl.emit("facetracking_stopped")
+      this.stopAll()
       alert("There was a problem while initializing the face tracker. Try again in a bit?")
     }
   },
@@ -130,5 +133,9 @@ AFRAME.registerSystem("avatar-webkit", {
     this.predictor.stop()
     this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: false })
     this.el.sceneEl.emit("facetracking_stopped")
+  },
+  stopAll: function () {
+    this.stopPredictor()
+    this.el.sceneEl.emit("action_end_video_sharing")
   },
 })

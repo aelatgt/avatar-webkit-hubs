@@ -9,6 +9,8 @@ module.exports = {
         "hubs-gray": "#868686",
         "hubs-blue": "#007AB8",
         "hubs-lightblue": "#008BD1",
+        "hubs-pink": "#f5325c",
+        "hubs-lightpink": "#f64b70",
       },
     },
   },

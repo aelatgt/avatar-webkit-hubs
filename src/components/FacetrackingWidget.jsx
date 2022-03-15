@@ -47,6 +47,10 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
     }
   }
 
+  const onCancelInitializing = () => {
+    onAction({ type: "stop" })
+  }
+
   /**
    * Event listeners
    */
@@ -97,7 +101,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
         </Collapsible>
       </div>
       {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialIntensities={initialIntensities} />}
-      {status === Status.INITIALIZING && <Initializing message={statusMessage} />}
+      {status === Status.INITIALIZING && <Initializing message={statusMessage} onCancel={onCancelInitializing} />}
     </>
   )
 }
