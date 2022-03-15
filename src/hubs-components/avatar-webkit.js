@@ -22,12 +22,20 @@ AFRAME.registerSystem("avatar-webkit", {
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
 
+    this.el.addEventListener("share_video_failed", () => {
+      alert("Failed to start webcam, have you granted camera permissions?")
+    })
+
     withFaceButton((button) => {
       button.onclick = () => {
-        this.startPredictor()
-        startMediaStream((stream) => {
+        const onStreamSuccess = (stream) => {
           this.startPredictor(stream)
-        })
+        }
+        const onStreamError = (error) => {
+          // This doesn't seem to ever run, hence the "share_video_failed" listener
+          console.error(error)
+        }
+        startMediaStream(onStreamSuccess, onStreamError)
         this.el.sceneEl.addEventListener(
           "action_end_video_sharing",
           () => {
