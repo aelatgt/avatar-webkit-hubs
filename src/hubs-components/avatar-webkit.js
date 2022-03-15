@@ -75,6 +75,8 @@ AFRAME.registerSystem("avatar-webkit", {
   startPredictor: async function (stream) {
     const rpmController = this.avatarRig.components["rpm-controller"]
 
+    this.el.sceneEl.emit("facetracking_initializing", "Loading face tracker model...")
+
     this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
       srcVideoStream: stream,
@@ -82,7 +84,6 @@ AFRAME.registerSystem("avatar-webkit", {
     })
 
     let started = false
-    this.el.sceneEl.emit("facetracking_initializing")
 
     this.predictor.onPredict = (results) => {
       if (!started) {
@@ -115,10 +116,15 @@ AFRAME.registerSystem("avatar-webkit", {
       }
     }
 
-    await this.predictor.start()
-    console.log("Predictor started...")
-
-    this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
+    try {
+      await this.predictor.start()
+      this.el.sceneEl.emit("facetracking_initializing", "Looking for a face...")
+      this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
+    } catch (e) {
+      this.el.sceneEl.emit("action_end_video_sharing")
+      this.el.sceneEl.emit("facetracking_stopped")
+      alert("There was a problem while initializing the face tracker. Try again in a bit?")
+    }
   },
   stopPredictor: function () {
     this.predictor.stop()

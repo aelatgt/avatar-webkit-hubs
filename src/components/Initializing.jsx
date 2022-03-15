@@ -1,9 +1,10 @@
-export function Initializing() {
+export function Initializing({ message }) {
   return (
     <div class="absolute w-full h-full grid place-items-center bg-black bg-opacity-30">
-      <div class="bg-white rounded-xl p-8 relative max-w-xl grid place-items-center gap-2">
+      <div class="bg-white rounded-xl p-8 relative w-[300px] max-w-xl grid place-items-center gap-2">
         <Spinner />
         <p class="text-xl font-semibold">Initializing</p>
+        <p class="text-sm text-hubs-gray">{message}</p>
       </div>
     </div>
   )

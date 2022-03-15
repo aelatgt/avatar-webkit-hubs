@@ -15,15 +15,25 @@ const Status = {
 export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialIntensities }) {
   const canvasContainer = useRef()
 
-  const [openSettings, setOpenSettings] = useState(false)
-  const [openPreview, setOpenPreview] = useState(false)
+  const [state, setState] = useState({
+    openSettings: false,
+    openPreview: false,
+    status: Status.STOPPED,
+    statusMessage: "",
+  })
+  const { openSettings, openPreview, status, statusMessage } = state
+  const setOpenSettings = (openSettings) => setState((state) => ({ ...state, openSettings }))
+  const setOpenPreview = (openPreview) => setState((state) => ({ ...state, openPreview }))
+  const setStatus = (status, statusMessage = "") => setState((state) => ({ ...state, status, statusMessage }))
+
   const togglePreview = () => {
     const _openPreview = !openPreview
     onPreviewVisibilityChange({ open: _openPreview })
     setOpenPreview(_openPreview)
   }
 
-  const [status, setStatus] = useState(Status.STOPPED)
+  console.log(state)
+
   const onClickPause = () => {
     switch (status) {
       case Status.PAUSED:
@@ -41,14 +51,12 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
    * Event listeners
    */
   useEffect(() => {
-    const onInitializing = () => setStatus(Status.INITIALIZING)
+    const onInitializing = (e) => setStatus(Status.INITIALIZING, e.detail)
     const onInitialized = () => {
-      setStatus(Status.RUNNING)
-      setOpenPreview(true)
+      setState((state) => ({ ...state, status: Status.RUNNING, openPreview: true }))
     }
     const onStop = () => {
-      setStatus(Status.STOPPED)
-      setOpenPreview(false)
+      setState((state) => ({ ...state, status: Status.STOPPED, openPreview: false }))
     }
     APP.scene.addEventListener("facetracking_initializing", onInitializing)
     APP.scene.addEventListener("facetracking_initialized", onInitialized)
@@ -89,7 +97,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
         </Collapsible>
       </div>
       {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialIntensities={initialIntensities} />}
-      {status === Status.INITIALIZING && <Initializing />}
+      {status === Status.INITIALIZING && <Initializing message={statusMessage} />}
     </>
   )
 }
