@@ -1,4 +1,4 @@
-import { applyIntensities, computeSimilarityVector, geometryBlendShapes, initialBlendShapes } from "@/utils/blendshapes"
+import { applyIntensities, computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -16,7 +16,8 @@ AFRAME.registerSystem("avatar-webkit", {
     this.baselineNeutral = { ...initialBlendShapes }
     this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
     this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
-    this.intensities = Object.fromEntries(geometryBlendShapes.map((name) => [name, 1]))
+    this.intensities = Object.fromEntries(geometryBlendShapesDesymmetrized.map((name) => [name, 1]))
+    this.intensities["mouthSmile"] = 0.6
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }

@@ -1,4 +1,4 @@
-import { geometryBlendShapes } from "@/utils/blendshapes"
+import { geometryBlendShapes, geometryBlendShapesDesymmetrized } from "@/utils/blendshapes"
 import { useState } from "preact/hooks"
 import { Button } from "./Button"
 
@@ -39,7 +39,7 @@ export function SettingsPopup({ onClose, onAction, initialIntensities }) {
         <p class="mb-2 mt-8 text-xl font-bold">Shape intensities</p>
         <div class="max-h-72 overflow-y-scroll">
           <div class="grid grid-cols-2 max-w-sm gap-y-2 items-center my-2">
-            {geometryBlendShapes.map((name) => (
+            {Object.keys(intensities).map((name) => (
               <>
                 <label htmlFor={`${name}Calibration`}>{name}</label>
                 <input
