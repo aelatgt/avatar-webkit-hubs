@@ -1,15 +1,23 @@
 import { useState } from "preact/hooks"
 import { Button } from "./Button"
 
-export function SettingsPopup({ onClose, onAction, initialRange }) {
-  const [range, setRange] = useState(initialRange)
-  const labels = ["Negative", "Neutral", "Positive"]
+export function SettingsPopup({ onClose, onAction, initialState }) {
+  const [state, setState] = useState(initialState)
+  const { range, enhancements } = state
   const setRangeItem = (i, value) => {
-    let newRange = [...range]
-    newRange[i] = Number(value)
+    let range = [...state.range]
+    range[i] = Number(value)
     onAction({ type: "set_range", payload: newRange })
-    setRange(newRange)
+    setState((state) => ({ ...state, range }))
   }
+
+  const setEnhancements = (enhancements) => {
+    onAction({ type: "set_enhancements", payload: enhancements })
+    setState((state) => ({ ...state, enhancements }))
+  }
+
+  const labels = ["Negative", "Neutral", "Positive"]
+
   return (
     <div class="absolute w-full h-full p-8 grid place-items-center bg-black bg-opacity-30">
       <div class="bg-white rounded-xl p-8 relative max-w-xl overflow-hidden">
@@ -46,18 +54,11 @@ export function SettingsPopup({ onClose, onAction, initialRange }) {
                 </>
               ))}
           </div>
-          <p class="mb-2 mt-8 text-xl font-bold">Aura calibration</p>
-          <div class="my-2 flex justify-center gap-2">
-            <Button onClick={() => onAction({ type: "calibrate_negative" })}>
-              <box-icon name="sad"></box-icon>
-            </Button>
-            <Button onClick={() => onAction({ type: "calibrate_neutral" })}>
-              <box-icon name="meh"></box-icon>
-            </Button>
-            <Button onClick={() => onAction({ type: "calibrate_positive" })}>
-              <box-icon name="happy"></box-icon>
-            </Button>
-          </div>
+          <p class="mb-2 mt-8 text-xl font-bold">Experimental</p>
+          <label class="my-2 flex gap-2">
+            <input type="checkbox" checked={enhancements} onChange={(e) => setEnhancements(e.target.checked)} />
+            Enable enhancements
+          </label>
         </div>
       </div>
     </div>

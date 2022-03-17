@@ -12,7 +12,7 @@ const Status = {
   PAUSED: 3,
 }
 
-export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialRange }) {
+export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialState }) {
   const canvasContainer = useRef()
 
   const [state, setState] = useState({
@@ -100,7 +100,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
           </div>
         </Collapsible>
       </div>
-      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialRange={initialRange} />}
+      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialState={initialState} />}
       {status === Status.INITIALIZING && <Initializing message={statusMessage} onCancel={onCancelInitializing} />}
     </>
   )

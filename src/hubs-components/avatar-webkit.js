@@ -1,4 +1,12 @@
-import { computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized, applyRange } from "@/utils/blendshapes"
+import {
+  computeSimilarityVector,
+  initialBlendShapes,
+  geometryBlendShapesDesymmetrized,
+  applyRange,
+  defaultBaselineNeutral,
+  defaultBaselinePositive,
+  defaultBaselineNegative,
+} from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -13,10 +21,11 @@ AFRAME.registerSystem("avatar-webkit", {
     this.avatarRig = APP.scene.querySelector("#avatar-rig")
 
     this.headCalibration = new THREE.Quaternion()
-    this.baselineNeutral = { ...initialBlendShapes }
-    this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
-    this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
+    this.baselineNeutral = { ...defaultBaselineNeutral }
+    this.baselineNegative = { ...defaultBaselineNegative }
+    this.baselinePositive = { ...defaultBaselinePositive }
     this.range = [-1, 0, 0.6] // lo, mid, hi
+    this.enhancements = false
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
@@ -69,6 +78,10 @@ AFRAME.registerSystem("avatar-webkit", {
           for (let i = 0; i < this.range.length; ++i) {
             this.range[i] = e.detail.payload[i]
           }
+          break
+        case "set_enhancements":
+          this.enhancements = e.detail.payload
+          this.el.sceneEl.emit("extensions_setvisible", { aura: this.enhancements, particles: this.enhancements })
           break
         case "stop":
           this.stopAll()

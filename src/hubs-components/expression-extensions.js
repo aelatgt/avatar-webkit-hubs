@@ -18,6 +18,7 @@ const particleSettings = {
 }
 
 const SIMILARITY_THRESHOLD = 0.5
+const LAMBDA = 0.4
 
 AFRAME.registerComponent("expression-extensions", {
   dependencies: ["billboard"],
@@ -50,24 +51,30 @@ AFRAME.registerComponent("expression-extensions", {
       particlesEl.setAttribute("visible", e.detail.particles)
     })
 
+    this.responsePositive = 0
+    this.responseNegative = 0
+
     Object.assign(this, { auraEl, particlesPositiveEl, particlesNegativeEl })
   },
   update: function () {
-    let size = Math.max(this.data.negativeInfluence, this.data.positiveInfluence)
-    size = remapSimilarity(size)
-    const color = this.data.positiveInfluence > this.data.negativeInfluence ? "#f5f242" : "#c8dff7"
+    let responsePositive = remapSimilarity(this.data.positiveInfluence)
+    let responseNegative = remapSimilarity(this.data.negativeInfluence)
+
+    this.responsePositive = THREE.MathUtils.lerp(this.responsePositive, responsePositive, LAMBDA)
+    this.responseNegative = THREE.MathUtils.lerp(this.responseNegative, responseNegative, LAMBDA)
+
+    let size = Math.max(this.responseNegative, this.responsePositive)
+    const color = this.responsePositive > this.responseNegative ? "#f5f242" : "#c8dff7"
     this.auraEl.setAttribute("material", { color, size })
 
-    const opacityPositive = remapSimilarity(this.data.positiveInfluence)
-    const opacityNegative = remapSimilarity(this.data.negativeInfluence)
     this.particlesPositiveEl.setAttribute("particle-emitter", {
-      startOpacity: opacityPositive,
-      middleOpacity: opacityPositive,
+      startOpacity: this.responsePositive,
+      middleOpacity: this.responsePositive,
       endOpacity: 0,
     })
     this.particlesNegativeEl.setAttribute("particle-emitter", {
-      startOpacity: opacityNegative,
-      middleOpacity: opacityNegative,
+      startOpacity: this.responseNegative,
+      middleOpacity: this.responseNegative,
       endOpacity: 0,
     })
   },

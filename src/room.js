@@ -8,7 +8,6 @@ import "boxicons"
 import "./hubs-components/facetracking-widget"
 import "./hubs-components/avatar-webkit"
 import "./hubs-components/rpm-controller"
-import "./hubs-components/admin-controls"
 
 NAF.options.updateRate = 30
 
