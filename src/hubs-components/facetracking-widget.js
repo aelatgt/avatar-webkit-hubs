@@ -37,7 +37,10 @@ AFRAME.registerSystem("facetracking-widget", {
       canvasEl: previewSelf.canvas,
       onPreviewVisibilityChange,
       onAction,
-      initialRange: avatarWebkit.range,
+      initialState: () => ({
+        range: avatarWebkit.range,
+        enhancements: avatarWebkit.enhancements,
+      }),
     }
     render(h(FacetrackingWidget, props, null), preactRoot)
 
