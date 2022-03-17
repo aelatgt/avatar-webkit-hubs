@@ -18,6 +18,7 @@ AFRAME.registerSystem("avatar-webkit", {
     this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
     this.intensities = Object.fromEntries(geometryBlendShapesDesymmetrized.map((name) => [name, 1]))
     this.intensities["mouthSmile"] = 0.6
+    this.range = [0, 0.5, 1] // lo, mid, hi
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
@@ -70,6 +71,11 @@ AFRAME.registerSystem("avatar-webkit", {
           const intensities = e.detail.payload
           Object.assign(this.intensities, intensities)
           break
+        case "set_range":
+          for (let i = 0; i < this.range.length; ++i) {
+            this.range[i] = e.detail.payload[i]
+          }
+          break
         case "stop":
           this.stopAll()
           break
@@ -102,7 +108,7 @@ AFRAME.registerSystem("avatar-webkit", {
           this.baselineNegative,
           this.baselinePositive,
         ])
-        applyIntensities(actionUnits, this.intensities)
+        // applyIntensities(actionUnits, this.intensities)
 
         // Convert head rotation from pitch / yaw / roll to quaternion
         euler.set(-rotation.pitch, rotation.yaw, -rotation.roll)

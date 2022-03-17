@@ -1,12 +1,14 @@
 import { useState } from "preact/hooks"
 import { Button } from "./Button"
 
-export function SettingsPopup({ onClose, onAction, initialIntensities }) {
-  const [intensities, setIntensities] = useState(initialIntensities)
-  const setIntensity = (name, intensity) => {
-    const newIntensities = { ...intensities, [name]: intensity }
-    onAction({ type: "set_intensities", payload: intensities })
-    setIntensities(newIntensities)
+export function SettingsPopup({ onClose, onAction, initialRange }) {
+  const [range, setRange] = useState(initialRange)
+  const labels = ["Min", "Baseline", "Max"]
+  const setRangeItem = (i, value) => {
+    let newRange = [...range]
+    newRange[i] = value
+    onAction({ type: "set_range", payload: newRange })
+    setRange(newRange)
   }
   return (
     <div class="absolute w-full h-full p-8 grid place-items-center bg-black bg-opacity-30">
@@ -36,22 +38,17 @@ export function SettingsPopup({ onClose, onAction, initialIntensities }) {
               <box-icon name="happy"></box-icon>
             </Button>
           </div>
-          <p class="mb-2 mt-8 text-xl font-bold">Shape intensities</p>
-          <div class="grid grid-cols-2 max-w-sm gap-y-2 items-center my-2">
-            {Object.keys(intensities).map((name) => (
-              <>
-                <label htmlFor={`${name}Calibration`}>{name}</label>
-                <input
-                  id={`${name}Calibration`}
-                  type="range"
-                  value={intensities[name]}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  onInput={(e) => setIntensity(name, e.target.value)}
-                />
-              </>
-            ))}
+          <p class="mb-4 mt-8 text-xl font-bold">Shape intensities</p>
+          <div class="grid grid-cols-[auto_auto_1fr] gap-x-5 gap-y-2 items-center">
+            {Array(3)
+              .fill()
+              .map((_, i) => (
+                <>
+                  <label class="flex gap-6 items-center">{labels[i]}</label>
+                  <input type="range" value={range[i]} min={0} max={1} step={0.05} onInput={(e) => setRangeItem(i, e.target.value)} />
+                  <p>{range[i]}</p>
+                </>
+              ))}
           </div>
         </div>
       </div>
