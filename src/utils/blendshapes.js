@@ -141,3 +141,33 @@ export function applyIntensities(blendShapes, intensities) {
     blendShapes[name] *= intensities[desymmetrizeMap[name]] ?? 1
   }
 }
+
+/**
+ *
+ * @param {BlendShapes} blendShapes
+ * @param {number[]} range
+ */
+export function applyRange(blendShapes, range) {
+  const [lo, mid, hi] = range
+  let smileAmount = (blendShapes.mouthSmileLeft + blendShapes.mouthSmileRight) / 2
+  let frownAmount = (blendShapes.mouthFrownLeft + blendShapes.mouthFrownRight) / 2
+  let mouthValue = smileAmount - frownAmount
+
+  // LERP in either low or high range
+  if (mouthValue > mid) {
+    mouthValue = mid + mouthValue * (hi - mid)
+  } else {
+    mouthValue = mid + mouthValue * (mid - lo)
+  }
+
+  if (mouthValue > 0) {
+    smileAmount = mouthValue
+    frownAmount = 0
+  } else {
+    frownAmount = -mouthValue
+    smileAmount = 0
+  }
+
+  blendShapes["mouthSmileLeft"] = blendShapes["mouthSmileRight"] = smileAmount
+  blendShapes["mouthFrownLeft"] = blendShapes["mouthFrownRight"] = frownAmount
+}

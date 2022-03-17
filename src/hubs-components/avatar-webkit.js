@@ -1,4 +1,4 @@
-import { applyIntensities, computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized } from "@/utils/blendshapes"
+import { computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized, applyRange } from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -16,8 +16,7 @@ AFRAME.registerSystem("avatar-webkit", {
     this.baselineNeutral = { ...initialBlendShapes }
     this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
     this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
-    this.intensities = Object.fromEntries(geometryBlendShapesDesymmetrized.map((name) => [name, 1]))
-    this.intensities["mouthSmile"] = 0.6
+    this.range = [-1, 0, 0.6] // lo, mid, hi
 
     this.rawHeadOrientation = new THREE.Quaternion()
     this.rawActionUnits = { ...initialBlendShapes }
@@ -66,9 +65,10 @@ AFRAME.registerSystem("avatar-webkit", {
         case "resume":
           this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
           break
-        case "set_intensities":
-          const intensities = e.detail.payload
-          Object.assign(this.intensities, intensities)
+        case "set_range":
+          for (let i = 0; i < this.range.length; ++i) {
+            this.range[i] = e.detail.payload[i]
+          }
           break
         case "stop":
           this.stopAll()
@@ -102,7 +102,7 @@ AFRAME.registerSystem("avatar-webkit", {
           this.baselineNegative,
           this.baselinePositive,
         ])
-        applyIntensities(actionUnits, this.intensities)
+        applyRange(actionUnits, this.range)
 
         // Convert head rotation from pitch / yaw / roll to quaternion
         euler.set(-rotation.pitch, rotation.yaw, -rotation.roll)

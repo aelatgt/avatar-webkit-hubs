@@ -12,7 +12,7 @@ const Status = {
   PAUSED: 3,
 }
 
-export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialIntensities }) {
+export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onAction, initialRange }) {
   const canvasContainer = useRef()
 
   const [state, setState] = useState({
@@ -31,8 +31,6 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
     onPreviewVisibilityChange({ open: _openPreview })
     setOpenPreview(_openPreview)
   }
-
-  console.log(state)
 
   const onClickPause = () => {
     switch (status) {
@@ -58,9 +56,11 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
     const onInitializing = (e) => setStatus(Status.INITIALIZING, e.detail)
     const onInitialized = () => {
       setState((state) => ({ ...state, status: Status.RUNNING, openPreview: true }))
+      onPreviewVisibilityChange({ open: true })
     }
     const onStop = () => {
       setState((state) => ({ ...state, status: Status.STOPPED, openPreview: false }))
+      onPreviewVisibilityChange({ open: false })
     }
     APP.scene.addEventListener("facetracking_initializing", onInitializing)
     APP.scene.addEventListener("facetracking_initialized", onInitialized)
@@ -100,7 +100,7 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
           </div>
         </Collapsible>
       </div>
-      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialIntensities={initialIntensities} />}
+      {openSettings && <SettingsPopup onClose={() => setOpenSettings(false)} onAction={onAction} initialRange={initialRange} />}
       {status === Status.INITIALIZING && <Initializing message={statusMessage} onCancel={onCancelInitializing} />}
     </>
   )
