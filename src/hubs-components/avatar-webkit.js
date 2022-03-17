@@ -1,4 +1,12 @@
-import { computeSimilarityVector, initialBlendShapes, geometryBlendShapesDesymmetrized, applyRange } from "@/utils/blendshapes"
+import {
+  computeSimilarityVector,
+  initialBlendShapes,
+  geometryBlendShapesDesymmetrized,
+  applyRange,
+  defaultBaselineNeutral,
+  defaultBaselinePositive,
+  defaultBaselineNegative,
+} from "@/utils/blendshapes"
 import { startMediaStream } from "@/utils/media-stream"
 import { withFaceButton } from "@/utils/share-button"
 import { AUPredictor } from "@quarkworks-inc/avatar-webkit"
@@ -13,9 +21,9 @@ AFRAME.registerSystem("avatar-webkit", {
     this.avatarRig = APP.scene.querySelector("#avatar-rig")
 
     this.headCalibration = new THREE.Quaternion()
-    this.baselineNeutral = { ...initialBlendShapes }
-    this.baselineNegative = { ...initialBlendShapes, mouthFrownLeft: 1, mouthFrownRight: 1 }
-    this.baselinePositive = { ...initialBlendShapes, mouthSmileLeft: 1, mouthSmileRight: 1 }
+    this.baselineNeutral = { ...defaultBaselineNeutral }
+    this.baselineNegative = { ...defaultBaselineNegative }
+    this.baselinePositive = { ...defaultBaselinePositive }
     this.range = [-1, 0, 0.6] // lo, mid, hi
     this.enhancements = false
 
