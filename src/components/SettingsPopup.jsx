@@ -3,17 +3,17 @@ import { Button } from "./Button"
 
 export function SettingsPopup({ onClose, onAction, initialRange }) {
   const [range, setRange] = useState(initialRange)
-  const labels = ["Min", "Baseline", "Max"]
+  const labels = ["Negative", "Neutral", "Positive"]
   const setRangeItem = (i, value) => {
     let newRange = [...range]
-    newRange[i] = value
+    newRange[i] = Number(value)
     onAction({ type: "set_range", payload: newRange })
     setRange(newRange)
   }
   return (
     <div class="absolute w-full h-full p-8 grid place-items-center bg-black bg-opacity-30">
-      <div class="bg-white rounded-xl p-8 relative max-w-xl h-full overflow-hidden">
-        <div class="flex flex-col overflow-y-auto h-full">
+      <div class="bg-white rounded-xl p-8 relative max-w-xl overflow-hidden">
+        <div class="flex flex-col">
           <button class="absolute top-2 right-2" onClick={onClose}>
             <box-icon name="x"></box-icon>
           </button>
@@ -26,6 +26,26 @@ export function SettingsPopup({ onClose, onAction, initialRange }) {
               <box-icon name="target-lock"></box-icon>Recenter Head
             </Button>
           </div>
+          <p class="mb-4 mt-8 text-xl font-bold">Expression Adjustment</p>
+          <div class="grid grid-cols-[auto_1fr_auto] gap-x-5 gap-y-2 items-center">
+            {Array(3)
+              .fill()
+              .map((_, i) => (
+                <>
+                  <label class="flex gap-6 items-center">{labels[i]}</label>
+                  <input
+                    class="w-80"
+                    type="range"
+                    value={range[i]}
+                    min={-2}
+                    max={2}
+                    step={0.1}
+                    onInput={(e) => setRangeItem(i, e.target.value)}
+                  />
+                  <p class="w-8 flex justify-center">{range[i]}</p>
+                </>
+              ))}
+          </div>
           <p class="mb-2 mt-8 text-xl font-bold">Aura calibration</p>
           <div class="my-2 flex justify-center gap-2">
             <Button onClick={() => onAction({ type: "calibrate_negative" })}>
@@ -37,18 +57,6 @@ export function SettingsPopup({ onClose, onAction, initialRange }) {
             <Button onClick={() => onAction({ type: "calibrate_positive" })}>
               <box-icon name="happy"></box-icon>
             </Button>
-          </div>
-          <p class="mb-4 mt-8 text-xl font-bold">Shape intensities</p>
-          <div class="grid grid-cols-[auto_auto_1fr] gap-x-5 gap-y-2 items-center">
-            {Array(3)
-              .fill()
-              .map((_, i) => (
-                <>
-                  <label class="flex gap-6 items-center">{labels[i]}</label>
-                  <input type="range" value={range[i]} min={0} max={1} step={0.05} onInput={(e) => setRangeItem(i, e.target.value)} />
-                  <p>{range[i]}</p>
-                </>
-              ))}
           </div>
         </div>
       </div>
