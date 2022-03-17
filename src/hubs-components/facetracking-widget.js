@@ -30,6 +30,8 @@ AFRAME.registerSystem("facetracking-widget", {
       sceneEl.emit("facetracking_action", action)
     }
 
+    this.el.sceneEl.addEventListener("facetracking_stopped", () => (previewSelf.enabled = false))
+
     sceneOverlay.shadowRoot.appendChild(preactRoot)
     const props = {
       canvasEl: previewSelf.canvas,

@@ -5,7 +5,7 @@ const SIZE = 256
 
 AFRAME.registerSystem("preview-self", {
   init: function () {
-    this.enabled = true
+    this.enabled = false
 
     const canvas = document.createElement("canvas")
     canvas.width = SIZE
@@ -66,7 +66,6 @@ AFRAME.registerSystem("preview-self", {
       this.updateRenderTargetNextTick = false
     }
   },
-  tock: function () {},
   renderPreview: function () {
     // Ensure background is transparent
     // this.el.sceneEl.object3D.background = null

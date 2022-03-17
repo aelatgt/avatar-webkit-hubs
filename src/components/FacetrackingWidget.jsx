@@ -32,8 +32,6 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
     setOpenPreview(_openPreview)
   }
 
-  console.log(state)
-
   const onClickPause = () => {
     switch (status) {
       case Status.PAUSED:
@@ -58,9 +56,11 @@ export function FacetrackingWidget({ canvasEl, onPreviewVisibilityChange, onActi
     const onInitializing = (e) => setStatus(Status.INITIALIZING, e.detail)
     const onInitialized = () => {
       setState((state) => ({ ...state, status: Status.RUNNING, openPreview: true }))
+      onPreviewVisibilityChange({ open: true })
     }
     const onStop = () => {
       setState((state) => ({ ...state, status: Status.STOPPED, openPreview: false }))
+      onPreviewVisibilityChange({ open: false })
     }
     APP.scene.addEventListener("facetracking_initializing", onInitializing)
     APP.scene.addEventListener("facetracking_initialized", onInitialized)
