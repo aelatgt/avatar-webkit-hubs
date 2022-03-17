@@ -4,9 +4,21 @@ export function withFaceButton(buttonFn = () => {}) {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {
         if (node.querySelector("h5")?.textContent === "Share") {
-          const shareGrid = node.querySelector('[class*="ButtonGridPopover__button-grid-popover"]')
-          const faceButton = injectFaceButton(shareGrid)
-          buttonFn(faceButton)
+          const initFaceButton = () => {
+            const shareGrid = node.querySelector('[class*="ButtonGridPopover__button-grid-popover"]')
+            const faceButton = injectFaceButton(shareGrid)
+            buttonFn(faceButton)
+          }
+
+          // Re-inject button caused by UI re-renders (e.g. chat logs)
+          const popoverObserver = new MutationObserver((mutations) => {
+            if (mutations.some((mutation) => mutation.removedNodes.length > 0)) {
+              initFaceButton()
+            }
+          })
+
+          popoverObserver.observe(node, { childList: true, subtree: true })
+          initFaceButton()
         }
       })
     })
