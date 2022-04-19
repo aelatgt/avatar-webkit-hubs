@@ -45,7 +45,7 @@ AFRAME.registerSystem("avatar-webkit", {
         }
         startMediaStream(onStreamSuccess, onStreamError)
         this.el.sceneEl.addEventListener(
-          "action_end_video_sharing",
+          "share_video_disabled",
           () => {
             this.stopPredictor()
           },
