@@ -7,7 +7,7 @@ export function SettingsPopup({ onClose, onAction, initialState }) {
   const setRangeItem = (i, value) => {
     let range = [...state.range]
     range[i] = Number(value)
-    onAction({ type: "set_range", payload: newRange })
+    onAction({ type: "set_range", payload: range })
     setState((state) => ({ ...state, range }))
   }
 

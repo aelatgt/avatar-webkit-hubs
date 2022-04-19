@@ -96,7 +96,6 @@ AFRAME.registerSystem("avatar-webkit", {
 
     this.predictor = new AUPredictor({
       apiToken: AVATAR_WEBKIT_AUTH_TOKEN,
-      srcVideoStream: stream,
       fps: 30,
     })
 
@@ -134,11 +133,12 @@ AFRAME.registerSystem("avatar-webkit", {
     }
 
     try {
-      await this.predictor.start()
+      await this.predictor.start({ stream })
       this.el.sceneEl.emit("facetracking_initializing", "Looking for a face...")
       this.avatarRig.setAttribute("rpm-controller", { trackingIsActive: true })
     } catch (e) {
       this.stopAll()
+      console.error(e)
       alert("There was a problem while initializing the face tracker. Try again in a bit?")
     }
   },
