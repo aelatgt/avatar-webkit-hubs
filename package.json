@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "node scripts/build.mjs",
-    "tunnel": "ngrok http 3000 --subdomain mattrossman"
+    "tunnel": "ngrok start tunnel --config ngrok.yml"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.2",

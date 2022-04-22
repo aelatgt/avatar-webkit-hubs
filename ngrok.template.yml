@@ -1,0 +1,7 @@
+authtoken: YOUR-AUTH-TOKEN
+tunnels:
+  tunnel:
+    proto: http
+    bind-tls: true
+    addr: 3000
+    subdomain: YOUR-SUBDOMAIN
